@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AML version="15.0 SP2">
+  <Item type="Form" action="add">
+    <id>GIT_Repository</id>
+    <name>GIT_Repository</name>
+    <width>900</width>
+    <height>700</height>
+    <stylesheet>../styles/default.css</stylesheet>
+
+    <Relationships>
+      <Item type="Body" action="add">
+        <bg_color>#FFFFFF</bg_color>
+        <Relationships>
+          <!-- Header Section -->
+          <Item type="Field" action="add">
+            <name>header</name>
+            <label>GitHub Repository</label>
+            <field_type>html</field_type>
+            <html_code><![CDATA[
+<div style="padding: 15px; background: #f6f8fa; border-bottom: 1px solid #e1e4e8;">
+  <h2 style="margin: 0; color: #24292e;" id="repoTitle">GitHub Repository</h2>
+  <div style="color: #586069; font-size: 12px;" id="repoSubtitle">GitHub Integration - Placeholder Interface</div>
+</div>
+            ]]></html_code>
+            <x>0</x>
+            <y>0</y>
+          </Item>
+
+          <!-- Basic Info Panel -->
+          <Item type="Field" action="add">
+            <name>basic_info</name>
+            <label>Repository Information</label>
+            <field_type>group</field_type>
+            <x>20</x>
+            <y>70</y>
+            <width>400</width>
+            <height>200</height>
+            <border_style>solid</border_style>
+            <border_width>1</border_width>
+            <border_color>#e1e4e8</border_color>
+          </Item>
+
+          <!-- Repository Name -->
+          <Item type="Field" action="add">
+            <parent_id keyed_name="basic_info" type="Field">
+              <Item type="Field" action="get">
+                <name>basic_info</name>
+              </Item>
+            </parent_id>
+            <name>name</name>
+            <label>Repository Name</label>
+            <field_type>text</field_type>
+            <x>10</x>
+            <y>20</y>
+            <display_length>200</display_length>
+            <is_readonly>1</is_readonly>
+          </Item>
+
+          <!-- Description -->
+          <Item type="Field" action="add">
+            <parent_id keyed_name="basic_info" type="Field">
+              <Item type="Field" action="get">
+                <name>basic_info</name>
+              </Item>
+            </parent_id>
+            <name>description</name>
+            <label>Description</label>
+            <field_type>textarea</field_type>
+            <x>10</x>
+            <y>60</y>
+            <textarea_rows>3</textarea_rows>
+            <textarea_cols>40</textarea_cols>
+            <is_readonly>1</is_readonly>
+          </Item>
+
+          <!-- GitHub Links -->
+          <Item type="Field" action="add">
+            <parent_id keyed_name="basic_info" type="Field">
+              <Item type="Field" action="get">
+                <name>basic_info</name>
+              </Item>
+            </parent_id>
+            <name>links</name>
+            <label>GitHub Links</label>
+            <field_type>html</field_type>
+            <html_code><![CDATA[
+<div style="margin-top: 10px;">
+  <p><strong>Web:</strong> <a href="#" id="webLink" target="_blank" style="color: #0366d6;">(link will appear here)</a></p>
+  <p><strong>Clone (HTTPS):</strong> <span id="cloneLink">(link will appear here)</span></p>
+  <p><strong>Default Branch:</strong> <span id="defaultBranch">main</span></p>
+</div>
+            ]]></html_code>
+            <x>10</x>
+            <y>120</y>
+          </Item>
+
+          <!-- Statistics Panel -->
+          <Item type="Field" action="add">
+            <name>stats_panel</name>
+            <label>Statistics</label>
+            <field_type>group</field_type>
+            <x>440</x>
+            <y>70</y>
+            <width>200</width>
+            <height>200</height>
+            <border_style>solid</border_style>
+            <border_width>1</border_width>
+            <border_color>#e1e4e8</border_color>
+          </Item>
+
+          <!-- Stats Content -->
+          <Item type="Field" action="add">
+            <parent_id keyed_name="stats_panel" type="Field">
+              <Item type="Field" action="get">
+                <name>stats_panel</name>
+              </Item>
+            </parent_id>
+            <name>stats_content</name>
+            <label>Stats</label>
+            <field_type>html</field_type>
+            <html_code><![CDATA[
+<div style="padding: 10px;">
+  <div style="text-align: center; margin: 10px 0;">
+    <div style="font-size: 24px; font-weight: bold;" id="starsCount">0</div>
+    <div style="font-size: 12px; color: #586069;">Stars</div>
+  </div>
+  <div style="text-align: center; margin: 10px 0;">
+    <div style="font-size: 24px; font-weight: bold;" id="forksCount">0</div>
+    <div style="font-size: 12px; color: #586069;">Forks</div>
+  </div>
+  <div style="text-align: center; margin: 10px 0;">
+    <div style="font-size: 24px; font-weight: bold;" id="issuesCount">0</div>
+    <div style="font-size: 12px; color: #586069;">Open Issues</div>
+  </div>
+</div>
+            ]]></html_code>
+            <x>10</x>
+            <y>10</y>
+          </Item>
+
+          <!-- Sync Status Panel -->
+          <Item type="Field" action="add">
+            <name>sync_panel</name>
+            <label>Sync Status</label>
+            <field_type>group</field_type>
+            <x>20</x>
+            <y>290</y>
+            <width>620</width>
+            <height>100</height>
+            <border_style>solid</border_style>
+            <border_width>1</border_width>
+            <border_color>#e1e4e8</border_color>
+          </Item>
+
+          <!-- Sync Content -->
+          <Item type="Field" action="add">
+            <parent_id keyed_name="sync_panel" type="Field">
+              <Item type="Field" action="get">
+                <name>sync_panel</name>
+              </Item>
+            </parent_id>
+            <name>sync_content</name>
+            <label>Sync</label>
+            <field_type>html</field_type>
+            <html_code><![CDATA[
+<div style="padding: 15px;">
+  <p><strong>Last Sync:</strong> <span id="lastSyncDate">Never</span></p>
+  <p><strong>Status:</strong> <span id="syncStatus" style="color: #666;">Placeholder mode - Real GitHub sync not implemented yet</span></p>
+  <button onclick="alert('Sync functionality will be implemented when GitHub API is connected')"
+          style="background: #2ea44f; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+    Sync with GitHub (Placeholder)
+  </button>
+</div>
+            ]]></html_code>
+            <x>10</x>
+            <y>10</y>
+          </Item>
+
+          <!-- Tabs Container -->
+          <Item type="Field" action="add">
+            <name>tabs_container</name>
+            <label>Repository Details</label>
+            <field_type>tabs</field_type>
+            <x>20</x>
+            <y>410</y>
+            <width>620</width>
+            <height>200</height>
+          </Item>
+
+          <!-- Issues Tab -->
+          <Item type="Field" action="add">
+            <parent_id keyed_name="tabs_container" type="Field">
+              <Item type="Field" action="get">
+                <name>tabs_container</name>
+              </Item>
+            </parent_id>
+            <name>issues_tab</name>
+            <label>Issues</label>
+            <field_type>html</field_type>
+            <html_code><![CDATA[
+<div style="padding: 20px;">
+  <h3>GitHub Issues</h3>
+  <p>Issue tracking will appear here when GitHub API is connected.</p>
+  <p>Placeholder: Use the "Create Issue" action in the context menu.</p>
+</div>
+            ]]></html_code>
+          </Item>
+
+          <!-- Branches Tab -->
+          <Item type="Field" action="add">
+            <parent_id keyed_name="tabs_container" type="Field">
+              <Item type="Field" action="get">
+                <name>tabs_container</name>
+              </Item>
+            </parent_id>
+            <name>branches_tab</name>
+            <label>Branches</label>
+            <field_type>html</field_type>
+            <html_code><![CDATA[
+<div style="padding: 20px;">
+  <h3>GitHub Branches</h3>
+  <p>Branch list will appear here when GitHub API is connected.</p>
+  <ul>
+    <li>main (default) - placeholder</li>
+    <li>master - placeholder</li>
+  </ul>
+</div>
+            ]]></html_code>
+          </Item>
+
+          <!-- Commits Tab -->
+          <Item type="Field" action="add">
+            <parent_id keyed_name="tabs_container" type="Field">
+              <Item type="Field" action="get">
+                <name>tabs_container</name>
+              </Item>
+            </parent_id>
+            <name>commits_tab</name>
+            <label>Commits</label>
+            <field_type>html</field_type>
+            <html_code><![CDATA[
+<div style="padding: 20px;">
+  <h3>Commit History</h3>
+  <p>Commit graph will appear here when GitHub API is connected.</p>
+  <p>The gitgraph.js visualization from the GitLab project can be reused here.</p>
+</div>
+            ]]></html_code>
+          </Item>
+
+          <!-- JavaScript for form -->
+          <Item type="Field" action="add">
+            <name>form_script</name>
+            <label>Script</label>
+            <field_type>html</field_type>
+            <html_code><![CDATA[
+<script>
+// Form initialization script
+document.addEventListener('DOMContentLoaded', function() {
+  // Update form with current item data
+  const item = document.thisItem;
+
+  if (item) {
+    // Update title
+    const title = item.getProperty('name') || item.getProperty('full_name') || 'GitHub Repository';
+    document.getElementById('repoTitle').textContent = title;
+
+    // Update links
+    const htmlUrl = item.getProperty('html_url');
+    const cloneUrl = item.getProperty('clone_url');
+    const defaultBranch = item.getProperty('default_branch') || 'main';
+
+    if (htmlUrl) {
+      document.getElementById('webLink').href = htmlUrl;
+      document.getElementById('webLink').textContent = htmlUrl;
+    }
+
+    if (cloneUrl) {
+      document.getElementById('cloneLink').textContent = cloneUrl;
+    }
+
+    document.getElementById('defaultBranch').textContent = defaultBranch;
+
+    // Update stats
+    document.getElementById('starsCount').textContent = item.getProperty('stars_count') || '0';
+    document.getElementById('forksCount').textContent = item.getProperty('forks_count') || '0';
+    document.getElementById('issuesCount').textContent = item.getProperty('open_issues_count') || '0';
+
+    // Update sync info
+    const lastSync = item.getProperty('last_sync_date');
+    document.getElementById('lastSyncDate').textContent = lastSync ? new Date(lastSync).toLocaleString() : 'Never';
+
+    const syncStatus = item.getProperty('sync_status') || 'never_synced';
+    document.getElementById('syncStatus').textContent =
+      syncStatus === 'never_synced' ? 'Never synced with GitHub' :
+      syncStatus === 'placeholder_complete' ? 'Placeholder sync complete' : syncStatus;
+  }
+});
+
+// Form refresh handler
+function onFormRefresh() {
+  console.log('GitHub Repository form refreshed');
+}
+</script>
+            ]]></html_code>
+            <x>0</x>
+            <y>650</y>
+          </Item>
+        </Relationships>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AML version="15.0 SP2">
+  <Item type="Method" action="add">
+    <id>getGitHubBranches</id>
+    <name>getGitHubBranches</name>
+    <method_type>JavaScript</method_type>
+    <method_code><![CDATA[
+// PLACEHOLDER: getGitHubBranches
+// Will fetch branches for a repository
+
+function getGitHubBranches(sourceItem) {
+    const innovator = sourceItem.getInnovator();
+
+    // Create placeholder branch items
+    const mainBranch = innovator.newItem("GIT_Branch");
+    mainBranch.setID(innovator.getNewID());
+    mainBranch.setProperty("id", mainBranch.getID());
+    mainBranch.setProperty("name", "main");
+    mainBranch.setProperty("commit_sha", "0000000000000000000000000000000000000000");
+    mainBranch.setProperty("protected", "0");
+
+    const masterBranch = innovator.newItem("GIT_Branch");
+    masterBranch.setID(innovator.getNewID());
+    masterBranch.setProperty("id", masterBranch.getID());
+    masterBranch.setProperty("name", "master");
+    masterBranch.setProperty("commit_sha", "0000000000000000000000000000000000000000");
+    masterBranch.setProperty("protected", "0");
+
+    mainBranch.appendItem(masterBranch);
+    return mainBranch;
+}
+
+getGitHubBranches;
+    ]]></method_code>
+  </Item>
+</AML>

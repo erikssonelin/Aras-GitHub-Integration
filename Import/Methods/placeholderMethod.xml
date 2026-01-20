@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AML version="15.0 SP2">
+  <Item type="Method" action="add">
+    <id>placeholderMethod</id>
+    <name>placeholderMethod</name>
+    <method_type>JavaScript</method_type>
+    <method_code><![CDATA[
+// Generic placeholder for all action methods
+
+function placeholderMethod(item) {
+    const innovator = item.getInnovator();
+    const methodName = this.getProperty("name", "unknown");
+
+    const msg = `GitHub Integration: Placeholder method '${methodName}' called. Real implementation needed.`;
+
+    // Show message to user
+    if (typeof aras !== 'undefined' && aras.AlertWarning) {
+        aras.AlertWarning(msg);
+    }
+
+    return innovator.newResult(msg);
+}
+
+placeholderMethod;
+    ]]></method_code>
+  </Item>
+</AML>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AML version="15.0 SP2">
+  <Item type="Method" action="add">
+    <id>getGitHubIssues</id>
+    <name>getGitHubIssues</name>
+    <method_type>JavaScript</method_type>
+    <method_code><![CDATA[
+// PLACEHOLDER: getGitHubIssues
+// Will fetch issues for a GitHub repository
+
+function getGitHubIssues(sourceItem) {
+    const innovator = sourceItem.getInnovator();
+
+    // Log placeholder call
+    innovator.applySQL(`
+        INSERT INTO [innovator].[LOG_MESSAGE]
+        (id, created_on, message)
+        VALUES (NEWID(), GETDATE(), 'GitHub: getGitHubIssues placeholder called for repo ' + CAST('${sourceItem.getID()}' AS NVARCHAR(MAX)))
+    `);
+
+    // Return empty result (placeholder)
+    return innovator.newResult("");
+}
+
+getGitHubIssues;
+    ]]></method_code>
+    <execution_allowed_to keyed_name="World" type="Identity">
+      <Item type="Identity" action="get">
+        <name>World</name>
+      </Item>
+    </execution_allowed_to>
+  </Item>
+</AML>

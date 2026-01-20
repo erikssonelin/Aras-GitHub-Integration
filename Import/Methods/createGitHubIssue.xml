@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AML version="15.0 SP2">
+  <Item type="Method" action="add">
+    <id>createGitHubIssue</id>
+    <name>createGitHubIssue</name>
+    <method_type>JavaScript</method_type>
+    <method_code><![CDATA[
+// PLACEHOLDER: createGitHubIssue
+// Will create a new issue on GitHub
+
+function createGitHubIssue(item) {
+    const innovator = item.getInnovator();
+
+    // Create placeholder issue in Aras (not on GitHub yet)
+    const issue = innovator.newItem("GIT_Issue");
+    issue.setID(innovator.getNewID());
+    issue.setProperty("id", issue.getID());
+    issue.setProperty("title", item.getProperty("title", "New Issue (placeholder)"));
+    issue.setProperty("description", item.getProperty("description", ""));
+    issue.setProperty("state", "open");
+    issue.setProperty("issue_number", "9999"); // Placeholder number
+
+    return issue;
+}
+
+createGitHubIssue;
+    ]]></method_code>
+  </Item>
+</AML>
