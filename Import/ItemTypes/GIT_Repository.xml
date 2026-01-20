@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AML version="15.0 SP2">
+  <Item type="ItemType" action="add">
+    <id>GIT_Repository</id>
+    <name>GIT_Repository</name>
+    <label>GitHub Repository</label>
+    <label_plural>GitHub Repositories</label_plural>
+    <implementation_type>table</implementation_type>
+    <is_relationship>0</is_relationship>
+    <is_versionable>0</is_versionable>
+    <revisions keyed_name="Default" type="Revision">
+      <Item type="Revision" action="get">
+        <name>Default</name>
+      </Item>
+    </revisions>
+    <structure_view>tabs on</structure_view>
+
+    <Relationships>
+      <!-- ========== CORE IDENTIFIERS ========== -->
+
+      <!-- GitHub's Numeric ID (Primary Identifier) -->
+      <Item type="Property" action="add">
+        <name>github_id</name>
+        <label>GitHub ID</label>
+        <data_type>string</data_type>
+        <is_indexed>1</is_indexed>
+        <is_required>1</is_required>
+        <stored_length>32</stored_length>
+      </Item>
+
+      <!-- Full Repository Name (owner/repo) -->
+      <Item type="Property" action="add">
+        <name>full_name</name>
+        <label>Full Name</label>
+        <data_type>string</data_type>
+        <is_indexed>1</is_indexed>
+        <keyed_name_order>1</keyed_name_order>
+        <stored_length>128</stored_length>
+        <is_required>1</is_required>
+      </Item>
+
+      <!-- Repository Name (just the repo part) -->
+      <Item type="Property" action="add">
+        <name>name</name>
+        <label>Name</label>
+        <data_type>string</data_type>
+        <keyed_name_order>2</keyed_name_order>
+        <stored_length>64</stored_length>
+      </Item>
+
+      <!-- Owner/Organization -->
+      <Item type="Property" action="add">
+        <name>owner</name>
+        <label>Owner</label>
+        <data_type>string</data_type>
+        <stored_length>64</stored_length>
+      </Item>
+
+      <!-- ========== DESCRIPTION ========== -->
+
+      <Item type="Property" action="add">
+        <name>description</name>
+        <label>Description</label>
+        <data_type>text</data_type>
+      </Item>
+
+      <!-- ========== REPOSITORY STATUS ========== -->
+
+      <Item type="Property" action="add">
+        <name>is_private</name>
+        <label>Private Repository</label>
+        <data_type>boolean</data_type>
+        <default_value>0</default_value>
+      </Item>
+
+      <Item type="Property" action="add">
+        <name>is_archived</name>
+        <label>Archived</label>
+        <data_type>boolean</data_type>
+        <default_value>0</default_value>
+      </Item>
+
+      <Item type="Property" action="add">
+        <name>is_fork</name>
+        <label>Fork</label>
+        <data_type>boolean</data_type>
+        <default_value>0</default_value>
+      </Item>
+
+      <Item type="Property" action="add">
+        <name>is_disabled</name>
+        <label>Disabled</label>
+        <data_type>boolean</data_type>
+        <default_value>0</default_value>
+      </Item>
+
+      <!-- ========== GIT URLs ========== -->
+
+      <Item type="Property" action="add">
+        <name>clone_url</name>
+        <label>Clone URL (HTTPS)</label>
+        <data_type>string</data_type>
+        <stored_length>256</stored_length>
+      </Item>
+
+      <Item type="Property" action="add">
+        <name>ssh_url</name>
+        <label>Clone URL (SSH)</label>
+        <data_type>string</data_type>
+        <stored_length>256</stored_length>
+      </Item>
+
+      <Item type="Property" action="add">
+        <name>html_url</name>
+        <label>GitHub URL</label>
+        <data_type>string</data_type>
+        <stored_length>256</stored_length>
+      </Item>
+
+      <!-- ========== BRANCH INFO ========== -->
+
+      <Item type="Property" action="add">
+        <name>default_branch</name>
+        <label>Default Branch</label>
+        <data_type>string</data_type>
+        <stored_length>32</stored_length>
+        <default_value>main</default_value>
+      </Item>
+
+      <!-- ========== STATISTICS ========== -->
+
+      <Item type="Property" action="add">
+        <name>stars_count</name>
+        <label>Stars</label>
+        <data_type>integer</data_type>
+        <default_value>0</default_value>
+      </Item>
+
+      <Item type="Property" action="add">
+        <name>forks_count</name>
+        <label>Forks</label>
+        <data_type>integer</data_type>
+        <default_value>0</default_value>
+      </Item>
+
+      <Item type="Property" action="add">
+        <name>open_issues_count</name>
+        <label>Open Issues</label>
+        <data_type>integer</data_type>
+        <default_value>0</default_value>
+      </Item>
+
+      <Item type="Property" action="add">
+        <name>watchers_count</name>
+        <label>Watchers</label>
+        <data_type>integer</data_type>
+        <default_value>0</default_value>
+      </Item>
+
+      <!-- ========== DATES ========== -->
+
+      <Item type="Property" action="add">
+        <name>created_at</name>
+        <label>Created On GitHub</label>
+        <data_type>date</data_type>
+      </Item>
+
+      <Item type="Property" action="add">
+        <name>updated_at</name>
+        <label>Last Updated</label>
+        <data_type>date</data_type>
+      </Item>
+
+      <Item type="Property" action="add">
+        <name>pushed_at</name>
+        <label>Last Push</label>
+        <data_type>date</data_type>
+      </Item>
+
+      <!-- ========== METADATA ========== -->
+
+      <Item type="Property" action="add">
+        <name>topics</name>
+        <label>Topics</label>
+        <data_type>text</data_type>
+        <tooltip>JSON array of repository topics</tooltip>
+      </Item>
+
+      <Item type="Property" action="add">
+        <name>license</name>
+        <label>License</label>
+        <data_type>string</data_type>
+        <stored_length>64</stored_length>
+      </Item>
+
+      <Item type="Property" action="add">
+        <name>language</name>
+        <label>Primary Language</label>
+        <data_type>string</data_type>
+        <stored_length>32</stored_length>
+      </Item>
+
+      <!-- ========== SYNC STATUS ========== -->
+
+      <Item type="Property" action="add">
+        <name>last_sync_date</name>
+        <label>Last Sync</label>
+        <data_type>date</data_type>
+      </Item>
+
+      <Item type="Property" action="add">
+        <name>sync_status</name>
+        <label>Sync Status</label>
+        <data_type>string</data_type>
+        <stored_length>32</stored_length>
+        <default_value>never_synced</default_value>
+      </Item>
+
+      <!-- ========== CONFIGURATION ========== -->
+
+      <Item type="Property" action="add">
+        <name>config_id</name>
+        <label>GitHub Configuration</label>
+        <data_type>item</data_type>
+        <foreign_property>id</foreign_property>
+        <foreign_type>GIT_Configuration</foreign_type>
+      </Item>
+
+      <!-- ========== VIEWS ========== -->
+
+      <!-- Default View -->
+      <Item type="View" action="add">
+        <client>js</client>
+        <display_priority>1</display_priority>
+        <related_id keyed_name="GIT_Repository" type="Form">
+          <Item type="Form" action="get">
+            <name>GIT_Repository</name>
+          </Item>
+        </related_id>
+        <role keyed_name="World" type="Identity">
+          <Item type="Identity" action="get">
+            <name>World</name>
+          </Item>
+        </role>
+        <type>default</type>
+      </Item>
+
+      <!-- Add View -->
+      <Item type="View" action="add">
+        <client>js</client>
+        <display_priority>2</display_priority>
+        <related_id keyed_name="GIT_Repository_add" type="Form">
+          <Item type="Form" action="get">
+            <name>GIT_Repository_add</name>
+          </Item>
+        </related_id>
+        <role keyed_name="World" type="Identity">
+          <Item type="Identity" action="get">
+            <name>World</name>
+          </Item>
+        </role>
+        <type>add</type>
+      </Item>
+
+      <!-- ========== SERVER EVENTS ========== -->
+
+      <!-- Sync on Get (like GitLab original) -->
+      <Item type="Server Event" action="add">
+        <server_event>onAfterGet</server_event>
+        <related_id keyed_name="getGitHubRepositories" type="Method">
+          <Item type="Method" action="get">
+            <name>getGitHubRepositories</name>
+          </Item>
+        </related_id>
+        <sort_order>128</sort_order>
+      </Item>
+
+      <!-- Validation on Save -->
+      <Item type="Server Event" action="add">
+        <server_event>onBeforeUpdate</server_event>
+        <related_id keyed_name="validateGitHubRepository" type="Method">
+          <Item type="Method" action="get">
+            <name>validateGitHubRepository</name>
+          </Item>
+        </related_id>
+        <sort_order>256</sort_order>
+      </Item>
+
+      <!-- ========== TOC ACCESS ========== -->
+
+      <Item type="TOC Access" action="add">
+        <related_id keyed_name="Administrators" type="Identity">
+          <Item type="Identity" action="get">
+            <name>Administrators</name>
+          </Item>
+        </related_id>
+        <category>Administration</category>
+      </Item>
+
+      <Item type="TOC Access" action="add">
+        <related_id keyed_name="World" type="Identity">
+          <Item type="Identity" action="get">
+            <name>World</name>
+          </Item>
+        </related_id>
+        <category>General</category>
+      </Item>
+
+      <!-- ========== PERMISSIONS ========== -->
+
+      <Item type="Can Add" action="add">
+        <can_add>1</can_add>
+        <related_id keyed_name="World" type="Identity">
+          <Item type="Identity" action="get">
+            <name>World</name>
+          </Item>
+        </related_id>
+      </Item>
+
+      <Item type="Allowed Permission" action="add">
+        <is_default>1</is_default>
+        <related_id keyed_name="Default Access" type="Permission">
+          <Item type="Permission" action="get">
+            <name>Default Access</name>
+          </Item>
+        </related_id>
+      </Item>
+
+    </Relationships>
+  </Item>
+</AML>

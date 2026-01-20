@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AML version="15.0 SP2">
+  <Item type="Form" action="add">
+    <id>GIT_Configuration</id>
+    <name>GIT_Configuration</name>
+    <width>500</width>
+    <height>350</height>
+
+    <Relationships>
+      <Item type="Body" action="add">
+        <Relationships>
+          <!-- Configuration Name -->
+          <Item type="Field" action="add">
+            <name>name</name>
+            <label>Configuration Name</label>
+            <field_type>text</field_type>
+            <x>20</x>
+            <y>20</y>
+            <display_length>200</display_length>
+          </Item>
+
+          <!-- GitHub Token -->
+          <Item type="Field" action="add">
+            <name>personal_access_token</name>
+            <label>GitHub Personal Access Token</label>
+            <field_type>text</field_type>
+            <x>20</x>
+            <y>70</y>
+            <display_length>300</display_length>
+            <tooltip>Create token at: https://github.com/settings/tokens</tooltip>
+            <password_mode>1</password_mode>
+          </Item>
+
+          <!-- API URL -->
+          <Item type="Field" action="add">
+            <name>api_url</name>
+            <label>GitHub API URL</label>
+            <field_type>text</field_type>
+            <x>20</x>
+            <y>120</y>
+            <display_length>300</display_length>
+            <default_value>https://api.github.com</default_value>
+          </Item>
+
+          <!-- Active Flag -->
+          <Item type="Field" action="add">
+            <name>is_active</name>
+            <label>Active</label>
+            <field_type>checkbox</field_type>
+            <x>20</x>
+            <y>170</y>
+          </Item>
+
+          <!-- Default Flag -->
+          <Item type="Field" action="add">
+            <name>is_default</name>
+            <label>Default Configuration</label>
+            <field_type>checkbox</field_type>
+            <x>20</x>
+            <y>200</y>
+          </Item>
+
+          <!-- Test Connection Button -->
+          <Item type="Field" action="add">
+            <name>test_button</name>
+            <label>Test Connection</label>
+            <field_type>button</field_type>
+            <x>20</x>
+            <y>240</y>
+            <onclick>testGitHubConnection</onclick>
+          </Item>
+
+          <!-- Status -->
+          <Item type="Field" action="add">
+            <name>status</name>
+            <label>Status</label>
+            <field_type>html</field_type>
+            <html_code><![CDATA[
+<div id="connectionStatus" style="margin-top: 10px; padding: 10px; display: none;">
+  <!-- Will be populated by JavaScript -->
+</div>
+            ]]></html_code>
+            <x>20</x>
+            <y>280</y>
+          </Item>
+        </Relationships>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>

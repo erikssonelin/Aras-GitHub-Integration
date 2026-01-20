@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AML version="15.0 SP2">
+  <Item type="Form" action="add">
+    <id>GIT_Issue</id>
+    <name>GIT_Issue</name>
+    <width>700</width>
+    <height>500</height>
+
+    <Relationships>
+      <Item type="Body" action="add">
+        <Relationships>
+          <!-- Issue Header -->
+          <Item type="Field" action="add">
+            <name>header</name>
+            <label>GitHub Issue</label>
+            <field_type>html</field_type>
+            <html_code><![CDATA[
+<div style="padding: 10px; background: #f6f8fa; border-bottom: 2px solid #e1e4e8;">
+  <h2 style="margin: 0; color: #24292e;">GitHub Issue <span id="issueNumber"></span></h2>
+  <div style="color: #586069; font-size: 12px;" id="issueState"></div>
+</div>
+            ]]></html_code>
+            <x>0</x>
+            <y>0</y>
+          </Item>
+
+          <!-- Title -->
+          <Item type="Field" action="add">
+            <name>title</name>
+            <label>Title</label>
+            <field_type>text</field_type>
+            <x>20</x>
+            <y>70</y>
+            <display_length>400</display_length>
+            <is_readonly>1</is_readonly>
+          </Item>
+
+          <!-- Description -->
+          <Item type="Field" action="add">
+            <name>description</name>
+            <label>Description</label>
+            <field_type>textarea</field_type>
+            <x>20</x>
+            <y>120</y>
+            <textarea_rows>10</textarea_rows>
+            <textarea_cols>80</textarea_cols>
+            <is_readonly>1</is_readonly>
+          </Item>
+
+          <!-- Metadata -->
+          <Item type="Field" action="add">
+            <name>metadata</name>
+            <label>Details</label>
+            <field_type>html</field_type>
+            <html_code><![CDATA[
+<div style="margin: 20px 0; padding: 15px; background: #fafbfc; border: 1px solid #d1d5da; border-radius: 3px;">
+  <table style="width: 100%;">
+    <tr>
+      <td style="width: 100px; font-weight: bold;">State:</td>
+      <td id="stateCell"></td>
+    </tr>
+    <tr>
+      <td style="font-weight: bold;">Assignee:</td>
+      <td id="assigneeCell"></td>
+    </tr>
+    <tr>
+      <td style="font-weight: bold;">Created:</td>
+      <td id="createdCell"></td>
+    </tr>
+    <tr>
+      <td style="font-weight: bold;">Updated:</td>
+      <td id="updatedCell"></td>
+    </tr>
+    <tr>
+      <td style="font-weight: bold;">Labels:</td>
+      <td id="labelsCell"></td>
+    </tr>
+  </table>
+</div>
+            ]]></html_code>
+            <x>20</x>
+            <y>280</y>
+          </Item>
+
+          <!-- Link to GitHub -->
+          <Item type="Field" action="add">
+            <name>github_link</name>
+            <label>GitHub</label>
+            <field_type>html</field_type>
+            <html_code><![CDATA[
+<div style="margin-top: 20px;">
+  <a href="#" id="githubLink" target="_blank" style="color: #0366d6; text-decoration: none;">
+    <span style="font-weight: bold;">View on GitHub</span> ↗
+  </a>
+</div>
+            ]]></html_code>
+            <x>20</x>
+            <y>380</y>
+          </Item>
+        </Relationships>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>

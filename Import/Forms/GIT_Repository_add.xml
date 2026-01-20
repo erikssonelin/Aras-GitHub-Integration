@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AML version="15.0 SP2">
+  <Item type="Form" action="add">
+    <id>GIT_Repository_add</id>
+    <name>GIT_Repository_add</name>
+    <width>600</width>
+    <height>400</height>
+    <stylesheet>../styles/default.css</stylesheet>
+
+    <Relationships>
+      <Item type="Body" action="add">
+        <bg_color>#FFFFFF</bg_color>
+        <Relationships>
+          <!-- Repository Name -->
+          <Item type="Field" action="add">
+            <name>name</name>
+            <label>Repository Name</label>
+            <field_type>text</field_type>
+            <x>20</x>
+            <y>20</y>
+            <display_length>300</display_length>
+            <is_required>1</is_required>
+          </Item>
+
+          <!-- GitHub Full Name (owner/repo) -->
+          <Item type="Field" action="add">
+            <name>full_name</name>
+            <label>GitHub Repository (owner/repo)</label>
+            <field_type>text</field_type>
+            <x>20</x>
+            <y>70</y>
+            <display_length>300</display_length>
+            <tooltip>Format: owner/repository-name</tooltip>
+          </Item>
+
+          <!-- Description -->
+          <Item type="Field" action="add">
+            <name>description</name>
+            <label>Description</label>
+            <field_type>textarea</field_type>
+            <x>20</x>
+            <y>120</y>
+            <textarea_rows>4</textarea_rows>
+            <textarea_cols>60</textarea_cols>
+          </Item>
+
+          <!-- GitHub ID -->
+          <Item type="Field" action="add">
+            <name>github_id</name>
+            <label>GitHub ID</label>
+            <field_type>text</field_type>
+            <x>20</x>
+            <y>220</y>
+            <display_length>100</display_length>
+            <is_hidden>1</is_hidden>
+          </Item>
+
+          <!-- Info Text -->
+          <Item type="Field" action="add">
+            <name>info_text</name>
+            <label>Information</label>
+            <field_type>html</field_type>
+            <html_code><![CDATA[
+<div style="padding: 15px; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 4px; margin: 10px 0;">
+  <p><strong>Note:</strong> After creating this repository, use the "Sync with GitHub" action to fetch details from GitHub.</p>
+  <p>You'll need to configure your GitHub token in the GitHub Configuration section first.</p>
+</div>
+            ]]></html_code>
+            <x>20</x>
+            <y>260</y>
+          </Item>
+        </Relationships>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>

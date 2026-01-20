@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AML version="15.0 SP2">
+  <Item type="RelationshipType" action="add">
+    <id>GIT_Repository_to_Branches</id>
+    <name>GIT_Repository_to_Branches</name>
+    <label>GitHub Branches</label>
+    <label_plural>GitHub Branches</label_plural>
+    <source_type>GIT_Repository</source_type>
+    <related_type>GIT_Branch</related_type>
+    <behavior>unordered list</behavior>
+    <is_private>0</is_private>
+    <preferred_width>300</preferred_width>
+
+    <!-- Relationship Properties -->
+    <Relationships>
+      <Item type="Property" action="add">
+        <name>sort_order</name>
+        <label>Sort Order</label>
+        <data_type>integer</data_type>
+        <is_hidden>1</is_hidden>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>

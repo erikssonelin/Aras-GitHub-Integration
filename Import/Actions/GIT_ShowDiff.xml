@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AML version="15.0 SP2">
+  <Item type="Action" action="add">
+    <id>GIT_ShowDiff</id>
+    <name>GIT_ShowDiff</name>
+    <label>Show GitHub Diff</label>
+    <label_plural>Show GitHub Diffs</label_plural>
+    <location>client</location>
+    <menu_label>Show Diff</menu_label>
+    <show_in_toc>0</show_in_toc>
+    <tooltip>Show changes in GitHub</tooltip>
+    <type>item</type>
+    <target>window</target>
+    <item_query>&lt;Item type="{@type}" action="get"&gt;&lt;id&gt;&lt;xsl:value-of select="@id" /&gt;&lt;/id&gt;&lt;/Item&gt;</item_query>
+
+    <!-- Action applies to multiple item types -->
+    <action_applies_to>
+      <Item type="Action Applies To" action="add">
+        <related_id keyed_name="GIT_Commit" type="ItemType">
+          <Item type="ItemType" action="get">
+            <name>GIT_Commit</name>
+          </Item>
+        </related_id>
+      </Item>
+      <Item type="Action Applies To" action="add">
+        <related_id keyed_name="GIT_PullRequest" type="ItemType">
+          <Item type="ItemType" action="get">
+            <name>GIT_PullRequest</name>
+          </Item>
+        </related_id>
+      </Item>
+    </action_applies_to>
+
+    <!-- Method (can be placeholder initially) -->
+    <method keyed_name="showGitHubDiff" type="Method">
+      <Item type="Method" action="get">
+        <name>showGitHubDiff</name>
+      </Item>
+    </method>
+  </Item>
+</AML>
