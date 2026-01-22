@@ -10,13 +10,64 @@
     </dependencies>
   </Item>
 
-  <!-- Import all your files -->
-  <Item type="ItemType" action="merge" id="GH_Configuration" />
-  <Item type="ItemType" action="merge" id="GH_Repository" />
-  <Item type="Form" action="merge" id="GH_Configuration" />
-  <Item type="Form" action="merge" id="GH_Repository" />
-  <Item type="Action" action="merge" id="GH_SyncRepository" />
-  <Item type="Method" action="merge" id="getGitHubRepositories" />
-  <Item type="Method" action="merge" id="syncGitHubRepository" />
-  <Item type="Method" action="merge" id="validateGitHubToken" />
+  <!-- ItemTypes -->
+  <Item type="ItemType" action="merge" id="GH_Configuration_ItemType">
+    <source_file>Import/ItemTypes/GH_Configuration_ItemType.xml</source_file>
+    <form_name>GH_Configuration_Form</form_name>
+  </Item>
+  <Item type="ItemType" action="merge" id="GH_Repository_ItemType">
+    <source_file>Import/ItemTypes/GH_Repository_ItemType.xml</source_file>
+    <form_name>GH_Repository_Form</form_name>
+  </Item>
+
+  <!-- Forms -->
+  <Item type="Form" action="merge" id="GH_Configuration_Form">
+    <source_file>Import/Forms/GH_Configuration_Form.xml</source_file>
+  </Item>
+  <Item type="Form" action="merge" id="GH_Repository_Form">
+    <source_file>Import/Forms/GH_Repository_Form.xml</source_file>
+  </Item>
+
+  <!-- Server Methods with permissions -->
+  <Item type="Method" action="merge" id="getGitHubRepositories">
+    <source_file>Import/Methods/getGitHubRepositories.js</source_file>
+    <Relationships>
+      <Item type="Allowed Permission" action="merge">
+        <related_id>
+          <Item type="Identity" action="get">
+            <name>World</name>
+          </Item>
+        </related_id>
+        <is_alias>0</is_alias>
+      </Item>
+    </Relationships>
+  </Item>
+
+  <Item type="Method" action="merge" id="syncGitHubRepository">
+    <source_file>Import/Methods/syncGitHubRepository.js</source_file>
+    <Relationships>
+      <Item type="Allowed Permission" action="merge">
+        <related_id>
+          <Item type="Identity" action="get">
+            <name>World</name>
+          </Item>
+        </related_id>
+        <is_alias>0</is_alias>
+      </Item>
+    </Relationships>
+  </Item>
+
+  <Item type="Method" action="merge" id="validateGitHubToken">
+    <source_file>Import/Methods/validateGitHubToken.js</source_file>
+    <Relationships>
+      <Item type="Allowed Permission" action="merge">
+        <related_id>
+          <Item type="Identity" action="get">
+            <name>World</name>
+          </Item>
+        </related_id>
+        <is_alias>0</is_alias>
+      </Item>
+    </Relationships>
+  </Item>
 </AML>

@@ -1,29 +1,264 @@
-// validateGitHubToken.js - Inno/JavaScript version
-var GitHubAPIClient = require("./../scripts/github/apiClient");
-var inn = ArasInnovator;
+var inn = this.getInnovator();
 
+// ERROR HANDLER
+function handleError(context, error, options) {
+  options = options || {};
+
+  inn.newResult("ERROR [" + context + "]: " + error.message);
+  if (error.stack) {
+    var stack = error.stack;
+    if (options.sanitizeToken) {
+      stack = stack.replace(new RegExp(options.sanitizeToken, "gi"), "[TOKEN]");
+    }
+    inn.newResult("Stack trace: " + stack.substring(0, 300));
+  }
+
+  var message = error.message;
+  if (options.sanitizeToken) {
+    message = message.replace(
+      new RegExp(options.sanitizeToken, "gi"),
+      "[TOKEN]",
+    );
+  }
+
+  return inn.newError(context + " failed: " + message);
+}
+
+// HTTP CLIENT WITH OPTIONS OBJECT
+var GitHubHttpClient = {
+  call: function (options) {
+    var config = options.config;
+    var method = options.method || "GET";
+    var path = options.path;
+    var timeout = options.timeout || 30000;
+    var body = options.body;
+    var token = options.token;
+
+    if (!token) {
+      throw new Error("GitHub token is required");
+    }
+
+    if (!path) {
+      throw new Error("API path is required");
+    }
+
+    var apiUrl = options.apiUrl || "https://api.github.com";
+    var http = inn.getHttpClient();
+
+    var headers = {
+      Authorization: "Bearer " + token,
+      Accept: "application/vnd.github.v3+json",
+      "User-Agent": "Aras-GitHub-Integration",
+      "Content-Type": "application/json",
+    };
+
+    http.setUrl(apiUrl + path);
+    for (var header in headers) {
+      if (headers.hasOwnProperty(header)) {
+        http.setRequestHeader(header, headers[header]);
+      }
+    }
+    http.setRequestMethod(method);
+
+    if (body) {
+      http.setRequestBody(JSON.stringify(body));
+    }
+
+    try {
+      http.setTimeout(timeout);
+      http.send();
+    } catch (e) {
+      throw new Error("Network error: " + e.message);
+    }
+
+    var status = http.getResponseStatusCode();
+
+    // RESPONSE HANDLER PATTERN
+    var responseHandlers = {
+      200: function () {
+        return {
+          status: status,
+          data: JSON.parse(http.getResponseString()),
+          headers: http.getAllResponseHeaders(),
+        };
+      },
+      401: function () {
+        throw new Error("Unauthorized - Invalid GitHub token");
+      },
+      403: function () {
+        var responseText = http.getResponseString();
+        var data = {};
+        try {
+          data = JSON.parse(responseText);
+        } catch (e) {}
+
+        var message = "Access forbidden";
+        if (data.message) {
+          message = data.message;
+        }
+        throw new Error(message + " (HTTP 403)");
+      },
+      404: function () {
+        throw new Error("Resource not found: " + path);
+      },
+      default: function () {
+        throw new Error(
+          "GitHub API error " + status + ": " + http.getResponseStatusText(),
+        );
+      },
+    };
+
+    var handler = responseHandlers[status] || responseHandlers.default;
+    return handler();
+  },
+};
+
+// VALIDATION HELPERS
+var Validator = {
+  required: function (value, fieldName) {
+    if (!value || String(value).trim() === "") {
+      throw new Error(fieldName + " is required");
+    }
+    return true;
+  },
+
+  isUrl: function (value, fieldName) {
+    var pattern = /^https?:\/\/.+/;
+    if (!pattern.test(value)) {
+      throw new Error(fieldName + " must be a valid URL");
+    }
+    return true;
+  },
+
+  isGitHubToken: function (token, fieldName) {
+    // Basic GitHub token validation (starts with ghp_ or gho_ or ghs_ for fine-grained)
+    if (!token) return false;
+
+    var tokenStr = String(token).trim();
+    if (tokenStr.length < 10) {
+      throw new Error(
+        fieldName + " appears too short for a valid GitHub token",
+      );
+    }
+
+    // Check for common GitHub token prefixes
+    var validPrefixes = ["ghp_", "gho_", "ghu_", "ghs_", "ghr_"];
+    var hasValidPrefix = false;
+    for (var i = 0; i < validPrefixes.length; i++) {
+      if (tokenStr.indexOf(validPrefixes[i]) === 0) {
+        hasValidPrefix = true;
+        break;
+      }
+    }
+
+    if (!hasValidPrefix) {
+      inn.newResult("Warning: Token doesn't start with common GitHub prefix");
+    }
+
+    return true;
+  },
+};
+
+// TOKEN VALIDATION SERVICE
+var TokenValidationService = {
+  sanitizeMessage: function (message, token) {
+    if (!token || !message) return message;
+    return message.replace(new RegExp(token, "gi"), "[TOKEN]");
+  },
+
+  validate: function (token, apiUrl) {
+    Validator.required(token, "GitHub Token");
+    Validator.isGitHubToken(token, "GitHub Token");
+
+    if (apiUrl) {
+      Validator.isUrl(apiUrl, "API URL");
+    }
+
+    var response = GitHubHttpClient.call({
+      token: token,
+      apiUrl: apiUrl || "https://api.github.com",
+      method: "GET",
+      path: "/user",
+      timeout: 30000,
+    });
+
+    if (!response.data || !response.data.login) {
+      throw new Error("Invalid response from GitHub API");
+    }
+
+    return {
+      valid: true,
+      user: response.data.login,
+      name: response.data.name || "",
+      id: response.data.id,
+      scopes: response.data.scopes || [],
+      rateLimit: this.extractRateLimit(response.headers),
+    };
+  },
+
+  extractRateLimit: function (headers) {
+    if (!headers) return null;
+
+    try {
+      var rateLimit = headers.match(/x-ratelimit-limit: (\d+)/i);
+      var rateRemaining = headers.match(/x-ratelimit-remaining: (\d+)/i);
+      var rateReset = headers.match(/x-ratelimit-reset: (\d+)/i);
+
+      if (rateLimit && rateRemaining) {
+        return {
+          limit: parseInt(rateLimit[1]),
+          remaining: parseInt(rateRemaining[1]),
+          resetAt: rateReset ? new Date(parseInt(rateReset[1]) * 1000) : null,
+        };
+      }
+    } catch (e) {
+      // Silently fail rate limit extraction
+    }
+
+    return null;
+  },
+
+  formatSuccessMessage: function (validationResult) {
+    var message = "Token is valid for user: " + validationResult.user;
+
+    if (validationResult.name) {
+      message += " (" + validationResult.name + ")";
+    }
+
+    if (validationResult.rateLimit) {
+      message +=
+        ". API calls remaining: " +
+        validationResult.rateLimit.remaining +
+        "/" +
+        validationResult.rateLimit.limit;
+    }
+
+    if (validationResult.scopes && validationResult.scopes.length > 0) {
+      message += ". Scopes: " + validationResult.scopes.join(", ");
+    }
+
+    return message;
+  },
+};
+
+// MAIN EXECUTION
 try {
-  // Get parameters
   var token = this.getProperty("token", "");
   var apiUrl = this.getProperty("api_url", "https://api.github.com");
 
-  if (!token) {
-    return inn.newError("Token is required");
-  }
+  var validationResult = TokenValidationService.validate(token, apiUrl);
 
-  // Validate token
-  var client = new GitHubAPIClient(token, apiUrl);
-  var validation = client.validateToken();
-
-  if (validation.valid) {
-    var message = "Token is valid for user: " + validation.username;
-    if (validation.name) {
-      message += " (" + validation.name + ")";
-    }
+  if (validationResult.valid) {
+    var message = TokenValidationService.formatSuccessMessage(validationResult);
     return inn.newResult(message);
   } else {
-    return inn.newError("Token validation failed: " + validation.reason);
+    return handleError(
+      "Token Validation",
+      new Error("Token validation returned invalid result"),
+    );
   }
 } catch (ex) {
-  return inn.newError("Token validation error: " + ex.message);
+  return handleError("GitHub Token Validation", ex, {
+    sanitizeToken: token,
+  });
 }
