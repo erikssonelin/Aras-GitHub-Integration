@@ -1,0 +1,194 @@
+<AML>
+ <Item type="Form" action="add">
+  <name>GH_Repository</name>
+  <label xml:lang="en">GitHub Repository</label>
+  <description xml:lang="en">GitHub repository details</description>
+  <core>0</core>
+  <body>
+   <![CDATA[<form>
+    <head>
+      <title>GitHub Repository</title>
+      <style>
+        .github-repo {
+          padding: 20px;
+        }
+        .repo-header {
+          border-bottom: 1px solid #ddd;
+          padding-bottom: 10px;
+          margin-bottom: 20px;
+        }
+        .repo-name {
+          font-size: 24px;
+          color: #333;
+          margin-bottom: 5px;
+        }
+        .repo-description {
+          color: #666;
+          font-size: 14px;
+          margin-bottom: 15px;
+        }
+        .repo-details {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 20px;
+        }
+        .detail-group {
+          background: #f5f5f5;
+          padding: 15px;
+          border-radius: 4px;
+        }
+        .detail-label {
+          font-weight: bold;
+          color: #333;
+          margin-bottom: 5px;
+        }
+        .detail-value {
+          color: #666;
+          word-break: break-all;
+        }
+        .sync-status {
+          display: inline-block;
+          padding: 3px 8px;
+          border-radius: 3px;
+          font-size: 12px;
+          font-weight: bold;
+        }
+        .status-synced {
+          background: #d4edda;
+          color: #155724;
+        }
+        .status-error {
+          background: #f8d7da;
+          color: #721c24;
+        }
+        .repo-actions {
+          margin-top: 20px;
+          padding-top: 20px;
+          border-top: 1px solid #ddd;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="github-repo">
+        <div class="repo-header">
+          <div class="repo-name" aras_name="name"></div>
+          <div class="repo-description" aras_name="description"></div>
+          <div>
+            <span class="sync-status" id="syncStatus"
+                  style="display:none;"></span>
+            Last synced: <span aras_name="last_synced"></span>
+          </div>
+        </div>
+
+        <div class="repo-details">
+          <div class="detail-group">
+            <div class="detail-label">Repository ID:</div>
+            <div class="detail-value" aras_name="github_id"></div>
+          </div>
+
+          <div class="detail-group">
+            <div class="detail-label">Full Name:</div>
+            <div class="detail-value" aras_name="full_name"></div>
+          </div>
+
+          <div class="detail-group">
+            <div class="detail-label">Owner:</div>
+            <div class="detail-value" aras_name="owner"></div>
+          </div>
+
+          <div class="detail-group">
+            <div class="detail-label">Default Branch:</div>
+            <div class="detail-value" aras_name="default_branch"></div>
+          </div>
+
+          <div class="detail-group">
+            <div class="detail-label">Visibility:</div>
+            <div class="detail-value">
+              <span aras_name="is_private"></span>
+            </div>
+          </div>
+
+          <div class="detail-group">
+            <div class="detail-label">Stars:</div>
+            <div class="detail-value" aras_name="stars"></div>
+          </div>
+
+          <div class="detail-group">
+            <div class="detail-label">Last Updated:</div>
+            <div class="detail-value" aras_name="updated_at"></div>
+          </div>
+
+          <div class="detail-group">
+            <div class="detail-label">Clone URL:</div>
+            <div class="detail-value" aras_name="clone_url"></div>
+          </div>
+
+          <div class="detail-group">
+            <div class="detail-label">HTML URL:</div>
+            <div class="detail-value">
+              <a aras_name="html_url" target="_blank"
+                 style="color: #0366d6; text-decoration: none;">
+                View on GitHub
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="repo-actions">
+          <button onclick="refreshRepository()" style="margin-right: 10px;">
+            Refresh from GitHub
+          </button>
+          <button onclick="openInGitHub()">
+            Open in GitHub
+          </button>
+        </div>
+      </div>
+
+      <script>
+        // Update sync status display
+        function updateSyncStatus() {
+          var status = document.getElementsByName('sync_status')[0].value;
+          var statusElement = document.getElementById('syncStatus');
+
+          if (status) {
+            statusElement.textContent = status;
+            statusElement.className = 'sync-status status-' + status;
+            statusElement.style.display = 'inline-block';
+          }
+        }
+
+        // Refresh repository data
+        function refreshRepository() {
+          var inn = top.aras.getInnovator();
+          var itemId = document.thisItem.getProperty('id', '');
+
+          inn.applyMethod('syncGitHubRepository',
+            '<repository_id>' + itemId + '</repository_id>'
+          ).then(function(result) {
+            if (result.isError()) {
+              alert('Refresh failed: ' + result.getErrorString());
+            } else {
+              alert('Repository refreshed successfully');
+              top.aras.uiReShowItem(itemId, 'GH_Repository');
+            }
+          });
+        }
+
+        // Open repository in GitHub
+        function openInGitHub() {
+          var url = document.getElementsByName('html_url')[0].value;
+          if (url) {
+            window.open(url, '_blank');
+          }
+        }
+
+        // Initialize when form loads
+        document.onLoad = function() {
+          updateSyncStatus();
+        };
+      </script>
+    </body>
+   </form>]]>
+  </body>
+ </Item>
+</AML>

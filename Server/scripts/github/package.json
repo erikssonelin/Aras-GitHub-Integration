@@ -1,0 +1,16 @@
+{
+  "name": "aras-github-integration",
+  "version": "1.0.0",
+  "description": "GitHub integration for Aras Innovator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2",
+    "crypto-js": "^4.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

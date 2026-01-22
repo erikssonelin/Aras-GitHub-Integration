@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AML>
+  <Item type="Package" action="add">
+    <name>GitHub Integration</name>
+    <description>GitHub integration for Aras Innovator</description>
+    <dependencies>
+      <Item type="Package" action="get">
+        <name>Core</name>
+      </Item>
+    </dependencies>
+  </Item>
+
+  <!-- Import all your files -->
+  <Item type="ItemType" action="merge" id="GH_Configuration" />
+  <Item type="ItemType" action="merge" id="GH_Repository" />
+  <Item type="Form" action="merge" id="GH_Configuration" />
+  <Item type="Form" action="merge" id="GH_Repository" />
+  <Item type="Action" action="merge" id="GH_SyncRepository" />
+  <Item type="Method" action="merge" id="getGitHubRepositories" />
+  <Item type="Method" action="merge" id="syncGitHubRepository" />
+  <Item type="Method" action="merge" id="validateGitHubToken" />
+</AML>
