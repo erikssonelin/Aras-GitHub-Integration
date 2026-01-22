@@ -1,1 +1,25 @@
+# Folder for files not currently in use
 gitignore/
+
+# Node.js
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Aras temporary files
+*.idx
+*.log
+*.iom
+*.aml
+ImportExport/
+temp/
+
+# IDE files
+.vscode/
+.idea/
+*.suo
+*.user
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,110 +1,371 @@
-// syncGitHubRepository.js - Inno/JavaScript version
-var GitHubAPIClient = require("./../scripts/github/apiClient");
-var GitHubUtils = require("./../scripts/github/utils");
-var inn = ArasInnovator;
+var inn = this.getInnovator();
 
+// ERROR HANDLER
+function handleError(context, error, options) {
+  options = options || {};
+
+  inn.newResult("ERROR [" + context + "]: " + error.message);
+  if (error.stack) {
+    var stack = error.stack;
+    if (options.sanitizeToken) {
+      stack = stack.replace(new RegExp(options.sanitizeToken, "gi"), "[TOKEN]");
+    }
+    inn.newResult("Stack trace: " + stack.substring(0, 300));
+  }
+
+  var message = error.message;
+  if (options.sanitizeToken) {
+    message = message.replace(
+      new RegExp(options.sanitizeToken, "gi"),
+      "[TOKEN]",
+    );
+  }
+
+  return inn.newError(context + " failed: " + message);
+}
+
+// CONFIGURATION SERVICE
+var ConfigService = {
+  getGitHubConfig: function () {
+    var aml =
+      "<Item type='GH_Configuration' action='get' " +
+      "select='github_token,api_url,github_user'>" +
+      "<order_by>created_on</order_by></Item>";
+    var result = inn.applyAML(aml);
+
+    if (result.isError() || result.getItemCount() === 0) {
+      return null;
+    }
+
+    var item = result.getItemByIndex(0);
+    return {
+      token: item.getProperty("github_token", ""),
+      apiUrl: item.getProperty("api_url", "https://api.github.com"),
+      username: item.getProperty("github_user", ""),
+    };
+  },
+};
+
+// HTTP CLIENT WITH OPTIONS OBJECT
+var GitHubHttpClient = {
+  call: function (options) {
+    var config = options.config;
+    var method = options.method || "GET";
+    var path = options.path;
+    var timeout = options.timeout || 30000;
+    var body = options.body;
+
+    if (!config || !path) {
+      throw new Error("Missing required parameters: config and path");
+    }
+
+    var url = config.apiUrl + path;
+    var http = inn.getHttpClient();
+
+    var headers = {
+      Authorization: "Bearer " + config.token,
+      Accept: "application/vnd.github.v3+json",
+      "User-Agent": "Aras-GitHub-Integration",
+      "Content-Type": "application/json",
+    };
+
+    http.setUrl(url);
+    for (var header in headers) {
+      if (headers.hasOwnProperty(header)) {
+        http.setRequestHeader(header, headers[header]);
+      }
+    }
+    http.setRequestMethod(method);
+
+    if (body) {
+      http.setRequestBody(JSON.stringify(body));
+    }
+
+    try {
+      http.setTimeout(timeout);
+      http.send();
+    } catch (e) {
+      throw new Error("Network error: " + e.message);
+    }
+
+    var status = http.getResponseStatusCode();
+
+    // RESPONSE HANDLER PATTERN
+    var responseHandlers = {
+      200: function () {
+        return JSON.parse(http.getResponseString());
+      },
+      401: function () {
+        throw new Error("Unauthorized - Invalid GitHub token");
+      },
+      403: function () {
+        throw new Error("Rate limit exceeded");
+      },
+      404: function () {
+        throw new Error("Resource not found: " + path);
+      },
+      default: function () {
+        throw new Error(
+          "GitHub API error " + status + ": " + http.getResponseStatusText(),
+        );
+      },
+    };
+
+    var handler = responseHandlers[status] || responseHandlers.default;
+    return handler();
+  },
+};
+
+// VALIDATION HELPERS
+var Validator = {
+  required: function (value, fieldName) {
+    if (!value || String(value).trim() === "") {
+      throw new Error(fieldName + " is required");
+    }
+    return true;
+  },
+
+  isUrl: function (value, fieldName) {
+    var pattern = /^https?:\/\/.+/;
+    if (!pattern.test(value)) {
+      throw new Error(fieldName + " must be a valid URL");
+    }
+    return true;
+  },
+
+  isPositiveInteger: function (value, fieldName) {
+    if (isNaN(value) || parseInt(value) < 0) {
+      throw new Error(fieldName + " must be a positive number");
+    }
+    return true;
+  },
+};
+
+// AML BUILDER PATTERN
+var AMLBuilder = {
+  create: function (itemType) {
+    var parts = [];
+    var attributes = {};
+
+    return {
+      action: function (action) {
+        attributes.action = action;
+        return this;
+      },
+
+      id: function (id) {
+        if (id) attributes.id = id;
+        return this;
+      },
+
+      property: function (name, value) {
+        if (value !== undefined && value !== null) {
+          parts.push(
+            "<" + name + ">" + this.escapeXml(value) + "</" + name + ">",
+          );
+        }
+        return this;
+      },
+
+      escapeXml: function (str) {
+        if (!str && str !== 0) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&apos;");
+      },
+
+      build: function () {
+        var aml = "<Item type='" + itemType + "'";
+
+        for (var attr in attributes) {
+          if (attributes.hasOwnProperty(attr) && attributes[attr]) {
+            aml += " " + attr + "='" + attributes[attr] + "'";
+          }
+        }
+
+        aml += ">";
+        aml += parts.join("");
+        aml += "</Item>";
+        return aml;
+      },
+    };
+  },
+};
+
+// REPOSITORY SYNC SERVICE
+var RepositorySyncService = {
+  generateSyncHash: function (repo) {
+    var data = {
+      name: repo.name,
+      description: repo.description || "",
+      updated_at: repo.updated_at,
+      stars: repo.stargazers_count || 0,
+    };
+
+    var str = JSON.stringify(data);
+    var hash = 0;
+    for (var i = 0; i < str.length; i++) {
+      hash = (hash << 5) - hash + str.charCodeAt(i);
+      hash = hash | 0;
+    }
+    return Math.abs(hash).toString();
+  },
+
+  formatDate: function (dateStr) {
+    if (!dateStr) return "";
+    try {
+      return new Date(dateStr).toISOString();
+    } catch (e) {
+      return "";
+    }
+  },
+
+  updateSyncStatus: function (repositoryId, status, errorMessage) {
+    try {
+      var aml = AMLBuilder.create("GH_Repository")
+        .action("edit")
+        .id(repositoryId)
+        .property("sync_status", status)
+        .property("last_synced", new Date().toISOString());
+
+      if (errorMessage) {
+        aml.property("sync_error", errorMessage.substring(0, 255));
+      }
+
+      inn.applyAML(aml.build());
+    } catch (e) {
+      inn.newResult("Failed to update sync status: " + e.message);
+    }
+  },
+
+  syncSingleRepository: function (repositoryId) {
+    Validator.required(repositoryId, "Repository ID");
+
+    var repository = inn.getItemById("GH_Repository", repositoryId);
+    if (repository.isError()) {
+      throw new Error("Repository not found: " + repository.getErrorString());
+    }
+
+    var githubId = repository.getProperty("github_id", "");
+    var owner = repository.getProperty("owner", "");
+    var repoName = repository.getProperty("name", "");
+
+    Validator.required(githubId, "GitHub ID");
+    Validator.required(owner, "Owner");
+    Validator.required(repoName, "Repository Name");
+
+    var config = ConfigService.getGitHubConfig();
+    if (!config) {
+      throw new Error("GitHub configuration not found");
+    }
+
+    Validator.required(config.token, "GitHub Token");
+    Validator.isUrl(config.apiUrl, "API URL");
+
+    var repoData = GitHubHttpClient.call({
+      config: config,
+      method: "GET",
+      path: "/repos/" + owner + "/" + repoName,
+      timeout: 30000,
+    });
+
+    if (!repoData || repoData.message) {
+      throw new Error(
+        "GitHub API error: " + (repoData.message || "Unknown error"),
+      );
+    }
+
+    var syncHash = this.generateSyncHash(repoData);
+    var currentHash = repository.getProperty("sync_hash", "");
+
+    if (currentHash === syncHash) {
+      return {
+        updated: false,
+        reason: "Repository is already up to date",
+        repository: repoData.name,
+      };
+    }
+
+    var updateAML = AMLBuilder.create("GH_Repository")
+      .action("edit")
+      .id(repositoryId)
+      .property("github_id", repoData.id)
+      .property("name", repoData.name)
+      .property("description", repoData.description || "")
+      .property("full_name", repoData.full_name)
+      .property("default_branch", repoData.default_branch)
+      .property("clone_url", repoData.clone_url)
+      .property("html_url", repoData.html_url)
+      .property("owner", repoData.owner.login)
+      .property("is_private", repoData.private ? "1" : "0")
+      .property("stars", repoData.stargazers_count || 0)
+      .property("updated_at", this.formatDate(repoData.updated_at))
+      .property("sync_status", "synced")
+      .property("sync_hash", syncHash)
+      .property("last_synced", new Date().toISOString())
+      .build();
+
+    var updateResult = inn.applyAML(updateAML);
+
+    if (updateResult.isError()) {
+      throw new Error(
+        "Failed to update repository: " + updateResult.getErrorString(),
+      );
+    }
+
+    return {
+      updated: true,
+      repository: repoData.name,
+      id: repositoryId,
+    };
+  },
+};
+
+// MAIN EXECUTION
 try {
   var repositoryId = this.getProperty("repository_id", "");
 
   if (!repositoryId) {
-    return inn.newError("Repository ID is required");
-  }
-
-  // Get the repository item
-  var repository = inn.getItemById("GH_Repository", repositoryId);
-  if (repository.isError()) {
-    return repository;
-  }
-
-  var githubId = repository.getProperty("github_id", "");
-  var owner = repository.getProperty("owner", "");
-  var repoName = repository.getProperty("name", "");
-
-  if (!githubId || !owner || !repoName) {
-    return inn.newError("Repository data is incomplete");
-  }
-
-  // Get GitHub configuration (simplified - assumes first config)
-  var config = inn.getItemByKeyedName("GH_Configuration", "Default");
-  if (config.isError()) {
-    return inn.newError("GitHub configuration not found");
-  }
-
-  var token = config.getProperty("github_token", "");
-  var apiUrl = config.getProperty("api_url", "https://api.github.com");
-
-  if (!token) {
-    return inn.newError("GitHub token is not configured");
-  }
-
-  // Fetch latest repository data
-  var client = new GitHubAPIClient(token, apiUrl);
-  var repoData = client.getRepository(owner, repoName);
-
-  // Validate response
-  GitHubUtils.validateGitHubResponse(repoData);
-
-  // Generate sync hash
-  var syncHash = GitHubUtils.generateSyncHash(repoData);
-
-  // Check if update is needed
-  var currentHash = repository.getProperty("sync_hash", "");
-  if (currentHash === syncHash) {
-    return inn.newResult("Repository is already up to date");
-  }
-
-  // Update repository
-  var updateRepo = inn.newItem("GH_Repository", "edit");
-  updateRepo.setID(repositoryId);
-  updateRepo.setProperty("name", repoData.name);
-  updateRepo.setProperty("description", repoData.description || "");
-  updateRepo.setProperty("full_name", repoData.full_name);
-  updateRepo.setProperty("default_branch", repoData.default_branch);
-  updateRepo.setProperty("clone_url", repoData.clone_url);
-  updateRepo.setProperty("html_url", repoData.html_url);
-  updateRepo.setProperty("owner", repoData.owner.login);
-  updateRepo.setProperty("is_private", repoData.private ? "1" : "0");
-  updateRepo.setProperty("stars", repoData.stargazers_count.toString());
-  updateRepo.setProperty(
-    "updated_at",
-    GitHubUtils.formatDate(repoData.updated_at),
-  );
-  updateRepo.setProperty("sync_status", "synced");
-  updateRepo.setProperty("sync_hash", syncHash);
-  updateRepo.setProperty("last_synced", new Date().toISOString());
-
-  updateRepo = updateRepo.apply();
-
-  if (updateRepo.isError()) {
-    return inn.newError(
-      "Failed to update repository: " + updateRepo.getErrorString(),
+    return handleError(
+      "Repository Sync",
+      new Error("Repository ID is required"),
     );
   }
 
-  return inn.newResult(
-    "Repository '" + repoData.name + "' updated successfully",
-  );
-} catch (ex) {
-  // Update repository with error status
-  try {
-    var errorRepo = inn.newItem("GH_Repository", "edit");
-    errorRepo.setID(repositoryId);
-    errorRepo.setProperty("sync_status", "error");
-    errorRepo.setProperty("last_synced", new Date().toISOString());
-    errorRepo.apply();
-  } catch (e) {
-    // Ignore update errors
-  }
+  var result = RepositorySyncService.syncSingleRepository(repositoryId);
 
-  if (ex.message.includes("rate limit")) {
-    return inn.newError(
-      "GitHub API rate limit exceeded. Please try again later.",
-    );
-  } else if (ex.message.includes("Not Found")) {
-    return inn.newError(
-      "Repository not found on GitHub. It may have been deleted or renamed.",
+  if (result.updated) {
+    return inn.newResult(
+      "Repository '" + result.repository + "' updated successfully",
     );
   } else {
-    return inn.newError("Failed to sync repository: " + ex.message);
+    return inn.newResult(result.reason);
   }
+} catch (ex) {
+  // Update repository status to error
+  if (repositoryId) {
+    var errorType = "error";
+    var errorMessage = ex.message;
+
+    if (ex.message.includes("rate limit")) {
+      errorType = "rate_limited";
+      errorMessage = "GitHub API rate limit exceeded";
+    } else if (ex.message.includes("Not Found")) {
+      errorType = "not_found";
+      errorMessage = "Repository not found on GitHub";
+    }
+
+    RepositorySyncService.updateSyncStatus(
+      repositoryId,
+      errorType,
+      errorMessage,
+    );
+  }
+
+  return handleError("Single Repository Sync", ex, {
+    sanitizeToken: repositoryId ? "" : "",
+  });
 }

@@ -1,0 +1,448 @@
+<AML>
+  <Item type="Form" action="add">
+    <name>GH_Repository_Form</name>
+    <label xml:lang="en">GitHub Repository</label>
+    <description xml:lang="en">GitHub repository details</description>
+    <core>0</core>
+    <body>
+   <![CDATA[<form>
+    <head>
+      <title>GitHub Repository</title>
+      <style>
+        .github-repo {
+          padding: 20px;
+        }
+        .repo-header {
+          border-bottom: 1px solid #ddd;
+          padding-bottom: 10px;
+          margin-bottom: 20px;
+        }
+        .repo-name {
+          font-size: 24px;
+          color: #333;
+          margin-bottom: 5px;
+        }
+        .repo-description {
+          color: #666;
+          font-size: 14px;
+          margin-bottom: 15px;
+        }
+        .repo-details {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 20px;
+        }
+        .detail-group {
+          background: #f5f5f5;
+          padding: 15px;
+          border-radius: 4px;
+        }
+        .detail-label {
+          font-weight: bold;
+          color: #333;
+          margin-bottom: 5px;
+        }
+        .detail-value {
+          color: #666;
+          word-break: break-all;
+        }
+        .sync-status {
+          display: inline-block;
+          padding: 3px 8px;
+          border-radius: 3px;
+          font-size: 12px;
+          font-weight: bold;
+        }
+        .status-synced {
+          background: #d4edda;
+          color: #155724;
+        }
+        .status-error {
+          background: #f8d7da;
+          color: #721c24;
+        }
+        .status-rate_limited {
+          background: #fff3cd;
+          color: #856404;
+        }
+        .status-not_found {
+          background: #e2e3e5;
+          color: #383d41;
+        }
+        .repo-actions {
+          margin-top: 20px;
+          padding-top: 20px;
+          border-top: 1px solid #ddd;
+          display: flex;
+          gap: 10px;
+        }
+        .loading-overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(255, 255, 255, 0.8);
+          z-index: 1000;
+          align-items: center;
+          justify-content: center;
+        }
+        .loading-spinner {
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #3498db;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        .action-button {
+          padding: 8px 16px;
+          background: #0079d3;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+        }
+        .action-button:hover {
+          background: #005fa3;
+        }
+        .action-button:disabled {
+          background: #cccccc;
+          cursor: not-allowed;
+        }
+        .action-button.secondary {
+          background: #6c757d;
+        }
+        .action-button.secondary:hover {
+          background: #545b62;
+        }
+        .error-message {
+          color: #dc3545;
+          background: #f8d7da;
+          padding: 10px;
+          border-radius: 4px;
+          margin-top: 10px;
+          display: none;
+        }
+        .success-message {
+          color: #155724;
+          background: #d4edda;
+          padding: 10px;
+          border-radius: 4px;
+          margin-top: 10px;
+          display: none;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <div class="github-repo">
+        <div class="repo-header">
+          <div class="repo-name" aras_name="name"></div>
+          <div class="repo-description" aras_name="description"></div>
+          <div>
+            <span class="sync-status" id="syncStatus" style="display:none;"></span>
+            Last synced: <span aras_name="last_synced"></span>
+          </div>
+        </div>
+
+        <div class="repo-details">
+          <div class="detail-group">
+            <div class="detail-label">Repository ID:</div>
+            <div class="detail-value" aras_name="github_id"></div>
+          </div>
+
+          <div class="detail-group">
+            <div class="detail-label">Full Name:</div>
+            <div class="detail-value" aras_name="full_name"></div>
+          </div>
+
+          <div class="detail-group">
+            <div class="detail-label">Owner:</div>
+            <div class="detail-value" aras_name="owner"></div>
+          </div>
+
+          <div class="detail-group">
+            <div class="detail-label">Default Branch:</div>
+            <div class="detail-value" aras_name="default_branch"></div>
+          </div>
+
+          <div class="detail-group">
+            <div class="detail-label">Visibility:</div>
+            <div class="detail-value">
+              <aras:if expr="[@is_private] = '1'">Private<aras:else/>Public</aras:if>
+            </div>
+          </div>
+
+          <div class="detail-group">
+            <div class="detail-label">Stars:</div>
+            <div class="detail-value" aras_name="stars"></div>
+          </div>
+
+          <div class="detail-group">
+            <div class="detail-label">Last Updated:</div>
+            <div class="detail-value" aras_name="updated_at"></div>
+          </div>
+
+          <div class="detail-group">
+            <div class="detail-label">Clone URL:</div>
+            <div class="detail-value" aras_name="clone_url"></div>
+          </div>
+
+          <div class="detail-group">
+            <div class="detail-label">HTML URL:</div>
+            <div class="detail-value">
+              <a aras_name="html_url" target="_blank" id="githubLink"
+                 style="color: #0366d6; text-decoration: none;">
+                View on GitHub
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <div class="repo-actions">
+          <button class="action-button" id="refreshButton">
+            Refresh from GitHub
+          </button>
+          <button class="action-button secondary" id="openGitHubButton">
+            Open in GitHub
+          </button>
+          <button class="action-button secondary" id="copyCloneUrlButton">
+            Copy Clone URL
+          </button>
+        </div>
+      </div>
+
+      <script>
+        // FORM STATE MANAGER
+        var FormState = {
+          isLoading: false,
+
+          setLoading: function(loading) {
+            this.isLoading = loading;
+            var overlay = document.getElementById('loadingOverlay');
+            var refreshBtn = document.getElementById('refreshButton');
+
+            if (loading) {
+              overlay.style.display = 'flex';
+              refreshBtn.disabled = true;
+              refreshBtn.textContent = 'Refreshing...';
+            } else {
+              overlay.style.display = 'none';
+              refreshBtn.disabled = false;
+              refreshBtn.textContent = 'Refresh from GitHub';
+            }
+          },
+
+          showError: function(message) {
+            var errorEl = document.getElementById('errorMessage');
+            var successEl = document.getElementById('successMessage');
+
+            successEl.style.display = 'none';
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+
+            // Auto-hide after 5 seconds
+            setTimeout(function() {
+              errorEl.style.display = 'none';
+            }, 5000);
+          },
+
+          showSuccess: function(message) {
+            var errorEl = document.getElementById('errorMessage');
+            var successEl = document.getElementById('successMessage');
+
+            errorEl.style.display = 'none';
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+
+            // Auto-hide after 3 seconds
+            setTimeout(function() {
+              successEl.style.display = 'none';
+            }, 3000);
+          }
+        };
+
+        // ASYNC METHOD WRAPPER (Promise-like pattern for ARAS)
+        var AsyncMethod = {
+          call: function(methodName, params) {
+            return {
+              then: function(successCallback, errorCallback) {
+                var inn = top.aras.getInnovator();
+
+                inn.applyMethod(methodName, params, function(result) {
+                  if (result.isError()) {
+                    if (errorCallback) {
+                      errorCallback(result.getErrorString());
+                    } else {
+                      FormState.showError('Error: ' + result.getErrorString());
+                    }
+                  } else {
+                    if (successCallback) {
+                      successCallback(result.getResult());
+                    }
+                  }
+                });
+              }
+            };
+          }
+        };
+
+        // SYNC STATUS MANAGER
+        var SyncStatus = {
+          updateDisplay: function() {
+            var status = document.getElementsByName('sync_status')[0].value;
+            var statusElement = document.getElementById('syncStatus');
+            var refreshBtn = document.getElementById('refreshButton');
+
+            if (status) {
+              statusElement.textContent = status.replace('_', ' ');
+              statusElement.className = 'sync-status status-' + status;
+              statusElement.style.display = 'inline-block';
+
+              // Disable refresh button if rate limited
+              if (status === 'rate_limited') {
+                refreshBtn.disabled = true;
+                refreshBtn.title = 'Rate limited - wait before refreshing';
+              } else {
+                refreshBtn.disabled = false;
+                refreshBtn.title = '';
+              }
+            }
+          },
+
+          getStatusClass: function(status) {
+            var statusMap = {
+              'synced': 'status-synced',
+              'error': 'status-error',
+              'rate_limited': 'status-rate_limited',
+              'not_found': 'status-not_found'
+            };
+            return statusMap[status] || 'status-synced';
+          }
+        };
+
+        // CLIPBOARD UTILITY
+        var Clipboard = {
+          copy: function(text) {
+            try {
+              var textArea = document.createElement('textarea');
+              textArea.value = text;
+              document.body.appendChild(textArea);
+              textArea.select();
+              document.execCommand('copy');
+              document.body.removeChild(textArea);
+              return true;
+            } catch (err) {
+              console.error('Failed to copy:', err);
+              return false;
+            }
+          }
+        };
+
+        // EVENT HANDLERS
+        var EventHandlers = {
+          onRefreshClick: function() {
+            var itemId = document.thisItem.getID();
+
+            FormState.setLoading(true);
+
+            AsyncMethod.call('syncGitHubRepository',
+              '<repository_id>' + itemId + '</repository_id>'
+            ).then(
+              function(result) {
+                FormState.setLoading(false);
+                FormState.showSuccess('Repository refreshed successfully');
+
+                // Refresh the form to show updated data
+                setTimeout(function() {
+                  top.aras.uiReShowItem(itemId, 'GH_Repository');
+                }, 1000);
+              },
+              function(error) {
+                FormState.setLoading(false);
+                FormState.showError('Refresh failed: ' + error);
+              }
+            );
+          },
+
+          onOpenGitHubClick: function() {
+            var url = document.getElementsByName('html_url')[0].value;
+            if (url) {
+              window.open(url, '_blank');
+            } else {
+              FormState.showError('GitHub URL not available');
+            }
+          },
+
+          onCopyCloneUrlClick: function() {
+            var cloneUrl = document.getElementsByName('clone_url')[0].value;
+            if (cloneUrl) {
+              if (Clipboard.copy(cloneUrl)) {
+                FormState.showSuccess('Clone URL copied to clipboard');
+              } else {
+                FormState.showError('Failed to copy to clipboard');
+              }
+            } else {
+              FormState.showError('Clone URL not available');
+            }
+          }
+        };
+
+        // INITIALIZATION
+        function initForm() {
+          // Update sync status display
+          SyncStatus.updateDisplay();
+
+          // Setup event listeners (modern approach - no inline onclick)
+          document.getElementById('refreshButton').addEventListener('click',
+            EventHandlers.onRefreshClick);
+
+          document.getElementById('openGitHubButton').addEventListener('click',
+            EventHandlers.onOpenGitHubClick);
+
+          document.getElementById('copyCloneUrlButton').addEventListener('click',
+            EventHandlers.onCopyCloneUrlClick);
+
+          // Setup GitHub link click tracking
+          var githubLink = document.getElementById('githubLink');
+          if (githubLink) {
+            githubLink.addEventListener('click', function() {
+              // Could log this event if needed
+              console.log('GitHub link clicked');
+            });
+          }
+
+          // Setup form field change tracking
+          var formFields = document.querySelectorAll('[aras_name]');
+          formFields.forEach(function(field) {
+            field.addEventListener('change', function() {
+              // Handle field changes if needed
+            });
+          });
+        }
+
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initForm);
+        } else {
+          initForm();
+        }
+      </script>
+    </body>
+   </form>]]>
+    </body>
+  </Item>
+</AML>
