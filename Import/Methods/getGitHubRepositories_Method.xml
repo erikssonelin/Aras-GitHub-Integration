@@ -1,4 +1,8 @@
-var inn = this.getInnovator();
+<AML>
+    <Item type="Method" action="add">
+        <name>getGitHubRepositories</name>
+        <method_type>JavaScript</method_type>
+        <method_code><![CDATA[var inn = this.getInnovator();
 
 // ERROR HANDLER
 function handleError(context, error, options) {
@@ -313,7 +317,7 @@ var SyncStrategies = {
 
 // MAIN EXECUTION
 try {
-  Validator.required(this.getID, "Item context");
+  Validator.required(this.getID(), "Item context");
 
   var config = ConfigService.getGitHubConfig();
   if (!config) {
@@ -402,3 +406,6 @@ try {
     sanitizeToken: config ? config.token : "",
   });
 }
+]]></method_code>
+    </Item>
+</AML>

@@ -1,4 +1,8 @@
-var inn = this.getInnovator();
+<AML>
+    <Item type="Method" action="add">
+        <name>syncGitHubRepository</name>
+        <method_type>JavaScript</method_type>
+        <method_code><![CDATA[var inn = this.getInnovator();
 
 // ERROR HANDLER
 function handleError(context, error, options) {
@@ -369,3 +373,6 @@ try {
     sanitizeToken: repositoryId ? "" : "",
   });
 }
+]]></method_code>
+    </Item>
+</AML>
