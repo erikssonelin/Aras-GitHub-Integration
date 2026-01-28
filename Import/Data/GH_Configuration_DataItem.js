@@ -1,0 +1,13 @@
+var inn = top.aras.getInnovator();
+
+var aml = `<AML>
+    <Item type="GH_Configuration" action="add">
+        <name>GitHub Configuration - ADD YOUR CREDENTIALS</name>
+        <github_token>PUT_YOUR_GITHUB_TOKEN_HERE</github_token>
+        <github_user>your-github-username</github_user>
+        <api_url>https://api.github.com</api_url>
+    </Item>
+</AML>`;
+
+var result = inn.applyAML(aml);
+result;
